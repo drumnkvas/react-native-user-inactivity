@@ -38,6 +38,13 @@ export interface UserInactivityProps<T = unknown> {
   isActive?: boolean;
 
   /**
+   * If it's set to `true` or a function that returns `true`, the timer will be restarted
+   * and repeated continuously until the component is unmounted.
+   * Defaults to false.
+   */
+  repeat?: () => boolean | boolean;
+
+  /**
    * Generic usetimeout-react-hook's TimeoutHandler implementation.
    * It defaults to the standard setTimeout/clearTimeout implementation.
    * See https://github.com/jkomyno/usetimeout-react-hook/#-how-to-use.
@@ -69,6 +76,7 @@ export interface UserInactivityProps<T = unknown> {
 const UserInactivity: React.FC<UserInactivityProps> = ({
   children,
   isActive,
+  repeat,
   onAction,
   style,
   timeForInactivity,
@@ -108,6 +116,9 @@ const UserInactivity: React.FC<UserInactivityProps> = ({
   const cancelTimer = useTimeout(() => {
     setActive(false);
     onAction(false);
+    if ((typeof repeat === 'boolean' && repeat) || (typeof repeat === 'function' && repeat())) {
+      setDate(Date.now());
+    }
     // @ts-ignore
   }, timeout, actualTimeoutHandler, [date, timeout]);
 
